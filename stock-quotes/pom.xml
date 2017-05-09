@@ -29,6 +29,12 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-webflux</artifactId>
 		</dependency>
+		<!-- tag::jacksonJSR310[] -->
+		<dependency>
+			<groupId>com.fasterxml.jackson.datatype</groupId>
+			<artifactId>jackson-datatype-jsr310</artifactId>
+		</dependency>
+		<!-- end::jacksonJSR310[] -->
 
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
