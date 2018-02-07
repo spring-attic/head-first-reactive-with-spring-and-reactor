@@ -23,26 +23,9 @@ public class QuoteHandler {
 		this.quoteStream = quoteGenerator.fetchQuoteStream(ofMillis(200)).share();
 	}
 
-	public Mono<ServerResponse> hello(ServerRequest request) {
-		return ok().contentType(TEXT_PLAIN)
-				.body(BodyInserters.fromObject("Hello Spring!"));
-	}
-
-	public Mono<ServerResponse> echo(ServerRequest request) {
-		return ok().contentType(TEXT_PLAIN)
-				.body(request.bodyToMono(String.class), String.class);
-	}
-
 	public Mono<ServerResponse> streamQuotes(ServerRequest request) {
 		return ok()
 				.contentType(APPLICATION_STREAM_JSON)
 				.body(this.quoteStream, Quote.class);
-	}
-
-	public Mono<ServerResponse> fetchQuotes(ServerRequest request) {
-		int size = Integer.parseInt(request.queryParam("size").orElse("10"));
-		return ok()
-				.contentType(APPLICATION_JSON)
-				.body(this.quoteStream.take(size), Quote.class);
 	}
 }

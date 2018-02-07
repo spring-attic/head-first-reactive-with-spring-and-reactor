@@ -1,5 +1,7 @@
 package io.spring.workshop.stockquotes;
 
+import java.util.List;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -23,19 +25,22 @@ public class StockQuotesApplicationTests {
 
 	@Test
 	public void fetchQuotes() {
-		webTestClient
+		List<Quote> result =
+				webTestClient
 				// We then create a GET request to test an endpoint
-				.get().uri("/quotes?size=20")
-				.accept(MediaType.APPLICATION_JSON)
+				.get().uri("/quotes")
+				.accept(MediaType.APPLICATION_STREAM_JSON)
 				.exchange()
 				// and use the dedicated DSL to test assertions against the response
 				.expectStatus().isOk()
-				.expectHeader().contentType(MediaType.APPLICATION_JSON)
-				.expectBodyList(Quote.class)
-				.hasSize(20)
-				// Here we check that all Quotes have a positive price value
-				.consumeWith(allQuotes ->
-						assertThat(allQuotes).allSatisfy(quote -> assertThat(quote.getPrice()).isPositive()));
+				.expectHeader().contentType(MediaType.APPLICATION_STREAM_JSON)
+				.returnResult(Quote.class)
+				.getResponseBody()
+				.take(20)
+				.collectList()
+				.block();
+
+		assertThat(result).allSatisfy(quote -> assertThat(quote.getPrice()).isPositive());
 	}
 
 }

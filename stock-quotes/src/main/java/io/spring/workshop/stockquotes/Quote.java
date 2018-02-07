@@ -12,7 +12,7 @@ public class Quote {
 
 	private BigDecimal price;
 
-	private Instant instant;
+	private Instant instant = Instant.now();
 
 	public Quote() {
 	}

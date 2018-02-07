@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.function.BiFunction;
+import java.util.stream.Collectors;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.SynchronousSink;
@@ -39,29 +40,24 @@ public class QuoteGenerator {
 
 	public Flux<Quote> fetchQuoteStream(Duration period) {
 
-		// We use here Flux.generate to create quotes,
-    // iterating on each stock starting at index 0
-		return Flux.generate(() -> 0,
-				(BiFunction<Integer, SynchronousSink<Quote>, Integer>) (index, sink) -> {
-					Quote updatedQuote = updateQuote(this.prices.get(index));
-					sink.next(updatedQuote);
-					return ++index % this.prices.size();
-				})
-				// We want to emit them with a specific period;
-        // to do so, we zip that Flux with a Flux.interval
-				.zipWith(Flux.interval(period)).map(t -> t.getT1())
-				// Because values are generated in batches,
-        // we need to set their timestamp after their creation
-				.map(quote -> {
-					quote.setInstant(Instant.now());
-					return quote;
-				})
+		return Flux.interval(period)
+				.onBackpressureDrop()
+				.map(this::generateQuotes)
+				.flatMapIterable(quotes -> quotes)
 				.log("io.spring.workshop.stockquotes");
 	}
 
-	private Quote updateQuote(Quote quote) {
-		BigDecimal priceChange = quote.getPrice()
-				.multiply(new BigDecimal(0.05 * this.random.nextDouble()), this.mathContext);
-		return new Quote(quote.getTicker(), quote.getPrice().add(priceChange));
+	private List<Quote> generateQuotes(long i) {
+		Instant instant = Instant.now();
+		return prices.stream()
+				.map(baseQuote -> {
+					BigDecimal priceChange = baseQuote.getPrice()
+							.multiply(new BigDecimal(0.05 * this.random.nextDouble()), this.mathContext);
+
+					Quote result = new Quote(baseQuote.getTicker(), baseQuote.getPrice().add(priceChange));
+					result.setInstant(instant);
+					return result;
+				})
+				.collect(Collectors.toList());
 	}
 }
