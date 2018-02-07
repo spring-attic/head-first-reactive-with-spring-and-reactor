@@ -7,22 +7,21 @@
     <meta name="description" content="Spring WebFlux Workshop"/>
     <meta name="author" content="Violeta Georgieva and Brian Clozel"/>
     <title>Spring Trading application</title>
-    <link rel="stylesheet" href="/webjars/bootstrap/3.3.7/css/bootstrap-theme.min.css"/>
-    <link rel="stylesheet" href="/webjars/bootstrap/3.3.7/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="/webjars/bootstrap/4.0.0/css/bootstrap-grid.min.css"/>
+    <link rel="stylesheet" href="/webjars/bootstrap/4.0.0/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="/webjars/highcharts/6.0.6/css/highcharts.css"/>
 </head>
 <body>
-<nav class="navbar navbar-default">
+<nav class="navbar navbar-expand navbar-dark flex-column flex-md-row bd-navbar">
     <div class="container-fluid">
         <div class="navbar-header">
             <a class="navbar-brand" href="/">Spring Trading application</a>
         </div>
-        <div id="navbar" class="navbar-collapse collapse">
             <ul class="nav navbar-nav">
-                <li class="active"><a href="/">Home</a></li>
-                <li><a href="/quotes">Quotes</a></li>
-                <li><a href="/websocket">Websocket</a></li>
+                <li class="navbar-nav flex-row ml-md-auto d-none d-md-flex"><a href="/">Home</a></li>
+                <li><a class="nav-item" href="/quotes">Quotes</a></li>
+                <li><a class="nav-item" href="/websocket">Websocket</a></li>
             </ul>
-        </div>
     </div>
 </nav>
 <div class="container wrapper">
@@ -44,7 +43,8 @@
         </tbody>
     </table>
 </div>
-<script type="text/javascript" src="/webjars/jquery/1.11.1/jquery.min.js"></script>
-<script type="text/javascript" src="/webjars/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="/webjars/jquery/3.0.0/jquery.min.js"></script>
+<script type="text/javascript" src="/webjars/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+
 </body>
 </html>

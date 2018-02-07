@@ -1,22 +1,22 @@
 package io.spring.workshop.tradingservice.websocket;
 
-import static org.junit.Assert.assertEquals;
-
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.Duration;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.ReplayProcessor;
+
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.reactive.socket.WebSocketMessage;
-import org.springframework.web.reactive.socket.client.StandardWebSocketClient;
+import org.springframework.web.reactive.socket.client.ReactorNettyWebSocketClient;
 import org.springframework.web.reactive.socket.client.WebSocketClient;
 
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.ReplayProcessor;
+import static org.junit.Assert.assertEquals;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -31,7 +31,7 @@ public class EchoWebSocketHandlerTests {
 		Flux<String> input = Flux.range(1, count).map(index -> "msg-" + index);
 		ReplayProcessor<Object> output = ReplayProcessor.create(count);
 
-		WebSocketClient client = new StandardWebSocketClient();
+		WebSocketClient client = new ReactorNettyWebSocketClient();
 		client.execute(getUrl("/websocket/echo"),
 				session -> session
 						.send(input.map(session::textMessage))

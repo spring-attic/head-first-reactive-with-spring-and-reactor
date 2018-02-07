@@ -7,9 +7,9 @@
     <meta name="description" content="Spring WebFlux Workshop"/>
     <meta name="author" content="Violeta Georgieva and Brian Clozel"/>
     <title>Spring Trading application</title>
-    <link rel="stylesheet" href="/webjars/bootstrap/3.3.7/css/bootstrap-theme.min.css"/>
-    <link rel="stylesheet" href="/webjars/bootstrap/3.3.7/css/bootstrap.min.css"/>
-    <link rel="stylesheet" href="/webjars/highcharts/5.0.8/css/highcharts.css"/>
+    <link rel="stylesheet" href="/webjars/bootstrap/4.0.0/css/bootstrap-grid.min.css"/>
+    <link rel="stylesheet" href="/webjars/bootstrap/4.0.0/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="/webjars/highcharts/6.0.6/css/highcharts.css"/>
 </head>
 <body>
 <nav class="navbar navbar-default">
@@ -29,9 +29,9 @@
 <div class="container wrapper">
     <div id="chart" style="height: 400px; min-width: 310px"></div>
 </div>
-<script type="text/javascript" src="/webjars/jquery/1.11.1/jquery.min.js"></script>
-<script type="text/javascript" src="/webjars/highcharts/5.0.8/highcharts.js"></script>
-<script type="text/javascript" src="/webjars/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="/webjars/jquery/3.0.0/jquery.min.js"></script>
+<script type="text/javascript" src="/webjars/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="/webjars/highcharts/6.0.6/highcharts.js"></script>
 <script type="text/javascript">
 
     // Setting up the chart
@@ -73,6 +73,8 @@
         }]
     });
 
+    var i = 0       ;
+
     // This function adds the given data point to the chart
     var appendStockData = function (quote) {
         chart.series
@@ -81,7 +83,8 @@
             })
             .forEach(function (serie) {
                 var shift = serie.data.length > 40;
-                serie.addPoint([quote.instant * 1000, quote.price], true, shift);
+                var redraw = i++ % 7 == 0;
+                serie.addPoint([Date.parse(quote.instant), quote.price], redraw, shift, false);
             });
     };
 
