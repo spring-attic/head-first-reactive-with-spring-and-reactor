@@ -14,7 +14,7 @@ public class TradingCompanyLatestQuote {
 
 	private final TradingCompany tradingCompany;
 
-	public TradingCompanyLatestQuote(Quote latestQuote, TradingCompany tradingCompany) {
+	public TradingCompanyLatestQuote(TradingCompany tradingCompany, Quote latestQuote) {
 		this.latestQuote = latestQuote;
 		this.tradingCompany = tradingCompany;
 	}

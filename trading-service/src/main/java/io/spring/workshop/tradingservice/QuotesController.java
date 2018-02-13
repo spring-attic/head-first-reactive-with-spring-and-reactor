@@ -23,16 +23,17 @@ public class QuotesController {
 
 	private final TradingCompanyService tradingCompanyService;
 
-	public QuotesController(TradingCompanyService tradingCompanyService) {
+	private final WebClient webClient;
+
+	public QuotesController(TradingCompanyService tradingCompanyService, WebClient.Builder webClientBuilder) {
 		this.tradingCompanyService = tradingCompanyService;
+		this.webClient = webClientBuilder.build();
 	}
 
 	@GetMapping(path = "/quotes/feed", produces = TEXT_EVENT_STREAM_VALUE)
 	@ResponseBody
 	public Flux<Quote> quotesStream() {
-		return WebClient.create("http://localhost:8081")
-				.get()
-				.uri("/quotes")
+		return this.webClient.get().uri("http://localhost:8081/quotes")
 				.accept(APPLICATION_STREAM_JSON)
 				.retrieve()
 				.bodyToFlux(Quote.class);
@@ -41,17 +42,15 @@ public class QuotesController {
 	@GetMapping(path = "/quotes/details/{ticker}", produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public Mono<TradingCompanyLatestQuote> quotesDetails(@PathVariable String ticker) {
-		return WebClient.create("http://localhost:8081")
-				.get()
-				.uri("/quotes")
-				.accept(APPLICATION_STREAM_JSON)
-				.retrieve()
-				.bodyToFlux(Quote.class)
-				.filter(q -> q.getTicker().equalsIgnoreCase(ticker))
-				.next()
-				.timeout(Duration.ofSeconds(15), Mono.just(new Quote(ticker)))
-				.zipWith(tradingCompanyService.getTradingCompany(ticker)
-								.switchIfEmpty(Mono.error(new TickerNotFoundException("Unknown Ticker: "+ticker))),
+		return tradingCompanyService.getTradingCompany(ticker)
+				.switchIfEmpty(Mono.error(new TickerNotFoundException("Unknown Ticker: "+ticker)))
+				.zipWith(this.webClient.get().uri("http://localhost:8081/quotes")
+								.accept(APPLICATION_STREAM_JSON)
+								.retrieve()
+								.bodyToFlux(Quote.class)
+								.filter(q -> q.getTicker().equalsIgnoreCase(ticker))
+								.next()
+								.timeout(Duration.ofSeconds(15), Mono.just(new Quote(ticker))),
 						TradingCompanyLatestQuote::new);
 	}
 

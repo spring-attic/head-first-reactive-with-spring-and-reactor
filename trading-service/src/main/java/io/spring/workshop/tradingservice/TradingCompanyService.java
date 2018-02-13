@@ -21,19 +21,21 @@ import org.springframework.web.reactive.function.client.WebClient;
 @Component
 public class TradingCompanyService {
 
+	private final WebClient webClient;
+
+	public TradingCompanyService(WebClient.Builder builder) {
+		this.webClient = builder.build();
+	}
+
 	public Flux<TradingCompany> findAllCompanies() {
-		return WebClient.create("http://localhost:8082")
-				.get()
-				.uri("/details")
+		return this.webClient.get().uri("http://localhost:8082/details")
 				.accept(MediaType.APPLICATION_JSON)
 				.retrieve()
 				.bodyToFlux(TradingCompany.class);
 	}
 
 	public Mono<TradingCompany> getTradingCompany(String ticker) {
-		return WebClient.create("http://localhost:8082")
-				.get()
-				.uri("/details/{ticker}", ticker)
+		return this.webClient.get().uri("http://localhost:8082/details/{ticker}", ticker)
 				.accept(MediaType.APPLICATION_JSON)
 				.retrieve()
 				.bodyToMono(TradingCompany.class);
