@@ -27,8 +27,7 @@ public class TradingCompanyService {
 				.uri("/details")
 				.accept(MediaType.APPLICATION_JSON)
 				.retrieve()
-				.bodyToFlux(TradingCompany.class)
-				.log("io.spring.workshop.tradingservice.details");
+				.bodyToFlux(TradingCompany.class);
 	}
 
 	public Mono<TradingCompany> getTradingCompany(String ticker) {
@@ -37,7 +36,6 @@ public class TradingCompanyService {
 				.uri("/details/{ticker}", ticker)
 				.accept(MediaType.APPLICATION_JSON)
 				.retrieve()
-				.bodyToMono(TradingCompany.class)
-				.log("io.spring.workshop.tradingservice.details.ticker");
+				.bodyToMono(TradingCompany.class);
 	}
 }
