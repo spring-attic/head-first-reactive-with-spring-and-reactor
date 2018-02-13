@@ -20,6 +20,6 @@ public class QuoteRouter {
 	@Bean
 	public RouterFunction<ServerResponse> route(QuoteHandler quoteHandler) {
 		return RouterFunctions
-				.route(GET("/quotes").and(accept(APPLICATION_STREAM_JSON)), quoteHandler::streamQuotes);
+				.route(GET("/quotes").and(accept(APPLICATION_STREAM_JSON)), quoteHandler::streamQuotes) ;
 	}
 }

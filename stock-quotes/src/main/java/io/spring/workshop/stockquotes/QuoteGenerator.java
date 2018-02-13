@@ -7,11 +7,10 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.SynchronousSink;
+import reactor.core.publisher.Mono;
 
 import org.springframework.stereotype.Component;
 
@@ -24,10 +23,21 @@ public class QuoteGenerator {
 
 	private final List<Quote> prices = new ArrayList<>();
 
+	private final Flux<Quote> quoteStream;
+
 	/**
 	 * Bootstraps the generator with tickers and initial prices
 	 */
 	public QuoteGenerator() {
+		initializeQuotes();
+		this.quoteStream = getQuoteStream();
+	}
+
+	public Flux<Quote> fetchQuoteStream() {
+		return quoteStream;
+	}
+
+	private void initializeQuotes() {
 		this.prices.add(new Quote("CTXS", 82.26));
 		this.prices.add(new Quote("DELL", 63.74));
 		this.prices.add(new Quote("GOOG", 847.24));
@@ -38,13 +48,13 @@ public class QuoteGenerator {
 	}
 
 
-	public Flux<Quote> fetchQuoteStream(Duration period) {
-
-		return Flux.interval(period)
+	private Flux<Quote> getQuoteStream() {
+		return Flux.interval(Duration.ofMillis(200))
 				.onBackpressureDrop()
 				.map(this::generateQuotes)
 				.flatMapIterable(quotes -> quotes)
-				.log("io.spring.workshop.stockquotes");
+				.log("io.spring.workshop.stockquotes")
+				.share();
 	}
 
 	private List<Quote> generateQuotes(long i) {

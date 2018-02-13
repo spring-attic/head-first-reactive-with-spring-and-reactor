@@ -17,6 +17,10 @@ public class Quote {
 	public Quote() {
 	}
 
+	public Quote(String ticker) {
+		this.ticker = ticker;
+	}
+
 	public Quote(String ticker, BigDecimal price) {
 		this.ticker = ticker;
 		this.price = price;
