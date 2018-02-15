@@ -1,0 +1,9 @@
+<div class="console" *ngIf="quotes$ | async as quotes">
+
+  <div *ngFor="let quote of quotes">
+    {{quote.instant}} ;
+    {{quote.ticker}} :
+    {{quote.price}}
+  </div>
+
+</div>
