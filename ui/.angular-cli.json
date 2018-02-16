@@ -16,12 +16,11 @@
       "polyfills": "polyfills.ts",
       "test": "test.ts",
       "tsconfig": "tsconfig.app.json",
-      "testTsconfig": "tsconfig.spec.json",
       "prefix": "app",
       "styles": [
         "styles.scss"
       ],
-      "scripts": [],
+      "scripts": [ "../node_modules/frappe-charts/dist/frappe-charts.min.iife.js"],
       "environmentSource": "environments/environment.ts",
       "environments": {
         "dev": "environments/environment.ts",
@@ -29,11 +28,6 @@
       }
     }
   ],
-  "e2e": {
-    "protractor": {
-      "config": "./protractor.conf.js"
-    }
-  },
   "lint": [
     {
       "project": "src/tsconfig.app.json",
@@ -48,11 +42,6 @@
       "exclude": "**/node_modules/**"
     }
   ],
-  "test": {
-    "karma": {
-      "config": "./karma.conf.js"
-    }
-  },
   "defaults": {
     "styleExt": "scss",
     "component": {}
