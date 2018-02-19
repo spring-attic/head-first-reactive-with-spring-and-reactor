@@ -3,27 +3,129 @@ Brian Clozel, Violeta Georgieva - Pivotal
 :sectanchors: true
 :source-highlighter: prettify
 :icons: font
-:toc: 
-:spring-boot-version: 2.0.0.M1
-:spring-framework-version: 5.0.0.RC1
+:toc:
+:spring-boot-version: 2.0.0.RC2
+:spring-framework-version: 5.0.4.RELEASE
 :spring-framework-doc-base: http://docs.spring.io/spring-framework/docs/{spring-framework-version}
 
 This repository hosts a complete workshop on Spring Boot + Spring WebFlux.
 Just follow this README and create your first WebFlux applications!
 Each step of this workshop has its companion commit in the git history with a detailed commit message.
 
-We'll create two applications:
+At the end of the workshop, we will have created three applications:
 
 * `stock-quotes` is a functional WebFlux app which streams stock quotes
-* `trading-service` is an annotation-based WebFlux app using a datastore, HTML views, and several browser-related technologies
+* `stock-details` is an annotation-based WebFlux app using a reactive datastore
+* `trading-service` is an annotation-based WebFlux app that consumes data from `stock-quotes` and `stock-details`
 
 Reference documentations can be useful while working on those apps:
 
 * http://projectreactor.io/docs[Reactor Core documentation]
-* Spring WebFlux 
+* Spring WebFlux
 {spring-framework-doc-base}/spring-framework-reference/web.html#web-reactive[reference documentation]
 and {spring-framework-doc-base}/javadoc-api/[javadoc]
 
+We will start off by creating the Trading Service application which gets data from a pre-built Stock Quotes application.
+
+== Trading Service application
+
+=== Create this application
+
+Go to `https://start.spring.io` and create a Maven project with Spring Boot {spring-boot-version},
+with groupId `io.spring.workshop` and artifactId `trading-service`. Select the `Reactive Web` Boot starter.
+Unzip the given file into a directory and import that application into your IDE.
+
+Note that, by default, `spring-boot-starter-webflux` transitively brings `spring-boot-starter-reactor-netty`
+and Spring Boot auto-configures Reactor Netty as a web server.
+
+Spring Boot supports Tomcat, Undertow and Jetty as well.
+
+=== Use the WebClient to stream JSON to the browser
+
+In this section, we'll call our remote `stock-quotes` service to get Quotes from it, so we first need to:
+
+* copy over the `Quote` class to this application
+* add the Jackson JSR310 module dependency
+
+Now create a `QuotesController` annotated with `@Controller` and a new method.
+The method should respond to `"GET /quotes/feed"` requests with the `"text/event-stream"` content-type,
+with a `Flux<Quote>` as the response body. This data is already served by the `stock-quotes` application
+, so you can use a `WebClient` to request the remote web service to retrieve that `Flux`.
+
+TIP: You should avoid making a request to the `stock-quotes` service for every browser connecting to
+that page — for that, you can use the `Flux.share()` operator.
+
+Now, let's create another application that can provide the details for a trading company.
+
+== Stock Details application
+
+=== Create this application
+
+Go to `https://start.spring.io` and create a Maven project with Spring Boot {spring-boot-version},
+with groupId `io.spring.workshop` and artifactId `stock-details`. Select the `Reactive Web`
+and `Reactive Mongo` Boot starters.
+
+=== Use a reactive datastore
+
+In this application, we’ll use a MongoDB datastore with its reactive driver; for this workshop, we’ll use an in-memory instance of MongoDB. So add the following:
+
+[source,xml]
+.stock-details/pom.xml
+----
+include::../stock-details/pom.xml[tags=inMemMongo]
+----
+
+We'd like to manage `TradingCompany` with our datastore.
+
+[source,java]
+.stock-details/src/main/java/io/spring/workshop/stockdetails/TradingCompany.java
+----
+include::../stock-details/src/main/java/io/spring/workshop/stockdetails/TradingCompany.java[]
+----
+
+Now create a `TradingCompanyRepository` interface that extends `ReactiveMongoRepository`.
+Add a `findByTicker(String ticker)` method that returns a single `TradingCompany` in a reactive fashion.
+
+We'd like to insert trading companies in our datastore when the application starts up. For that, create a `TradingCompanyCommandLineRunner`
+component that implements Spring Boot's `CommandLineRunner`. In the `run` method, use the reactive repository
+to insert `TradingCompany` instances in the datastore.
+
+NOTE: Since the `run` method returns void, it expects a blocking implementation. This is why you should use the
+`blockLast(Duration)` operator on the `Flux` returned by the repository when inserting data.
+You can also `then().block(Duration)` to turn that `Flux` into a `Mono<Void>` that waits for completion.
+
+=== Create a JSON web service
+
+We're now going to expose `TradingCompany` through a Controller.
+First, create a `TradingCompanyController` annotated with `@RestController`.
+Then add two new Controller methods in order to handle:
+
+* GET requests to  `"/details"`, returning all `TradingCompany` instances, serializing them with content-type `"application/json"`
+* GET requests to  `"/details/{ticker}"`, returning a single `TradingCompany` instance, serializing it with content-type `"application/json"`
+
+Now that we have an application that can return the details for a company with a given ticker, we can update the Trading Service application
+to use those details and return a combination of the latest quote for that ticker along with the company's details.
+
+== Update Trading Service application
+
+We will first create a service that will use a `WebClient` to get data from the Stock Details application.
+First, create a `TradingCompanyService` annotated with `@Component`.
+Then add two methods:
+
+* `findAllCompanies` will return a `Flux<TradingCompany>` by using the webClient to get data from the `/details` endpoint from the Stock details application
+* `getTradingCompany` will return a `Mono<TradingCompany>` by using the webClient to get data from the `/details/{ticker}` endpoint from the Stock details application
+
+Since we want to combine date returned by `stock-quotes` and `stock-details`, let's create a model for that called `TradingCompanyLatestQuote`.
+
+Copy the following classes to your project.
+
+[source,java]
+.trading-service/src/main/java/io/spring/workshop/tradingservice/TradingCompanyLatestQuote.java
+----
+include::../trading-service/src/main/java/io/spring/workshop/tradingservice/TradingCompanyLatestQuote.java[]
+----
+
+Now, add another method to the `QuotesController` which can handle requests to `/quotes/details/{ticker}`.
 
 == Stock Quotes application
 
@@ -100,7 +202,7 @@ a `Mono<HandlerFunction>`. If a request matches a particular route, a handler fu
 otherwise it returns an empty `Mono`. The `RouterFunction` has a similar purpose as the `@RequestMapping`
 annotation in `@Controller` classes.
 
-Take a look at the code samples in 
+Take a look at the code samples in
 {spring-framework-doc-base}/spring-framework-reference/web.html#web-reactive-server-functional[the Spring WebFlux.fn reference documentation]
 
 === Create your first HandlerFunction + RouterFunction
@@ -109,7 +211,7 @@ First, create a `QuoteHandler` class and mark is as a `@Component`;this class wi
 Now create a `hello` handler function in that class that always returns "text/plain" HTTP responses with "Hello Spring!" as body.
 
 To route requests to that handler, you need to expose a `RouterFunction` to Spring Boot.
-Create a `QuoteRouter` configuration class (i.e. annotated with `@Configuration`) 
+Create a `QuoteRouter` configuration class (i.e. annotated with `@Configuration`)
 that creates a bean of type `RouterFunction<ServerResponse>`.
 
 Modify that class so that GET requests to `"/hello"` are routed to the handler you just implemented.
@@ -153,7 +255,7 @@ a `Flux<Quote>` from it that emits a `Quote` every 200 msec and can be **shared*
 multiple subscribers (look at the `Flux` operators for that). This instance should be kept
 as an attribute for reusability.
 
-Now create a `streamQuotes` handler that streams those generated quotes 
+Now create a `streamQuotes` handler that streams those generated quotes
 with the `"application/stream+json"` content type. Add the corresponding part in the `RouterFunction`,
 on the `"/quotes"` endpoint.
 
@@ -195,7 +297,7 @@ Content-Type: application/json
 
 Spring WebFlux (actually the `spring-test` module) includes a `WebTestClient`
 that can be used to test WebFlux server endpoints with or without a running server.
-Tests without a running server are comparable to MockMvc from Spring MVC where mock request 
+Tests without a running server are comparable to MockMvc from Spring MVC where mock request
 and response are used instead of connecting over the network using a socket.
 The WebTestClient however can also perform tests against a running server.
 
@@ -206,177 +308,6 @@ integration test:
 .stock-quotes/src/test/java/io/spring/workshop/stockquotes/StockQuotesApplicationTests.java
 ----
 include::../stock-quotes/src/test/java/io/spring/workshop/stockquotes/StockQuotesApplicationTests.java[]
-----
-
-== Trading Service application
-
-=== Create this application
-
-Go to `https://start.spring.io` and create a Maven project with Spring Boot {spring-boot-version},
-with groupId `io.spring.workshop` and artifactId `trading-service`. Select the `Reactive Web`
-, `Devtools`, `Thymeleaf` and `Reactive Mongo` Boot starters.
-Unzip the given file into a directory and import that application into your IDE.
-
-=== Use Tomcat as a web engine
-
-By default, `spring-boot-starter-webflux` transitively brings `spring-boot-starter-reactor-netty`
-and Spring Boot auto-configures Reactor Netty as a web server. For this application, we'll use
-Tomcat as an alternative.
-
-[source,xml]
-.trading-service/pom.xml
-----
-include::../trading-service/pom.xml[tags=tomcat]
-----
-
-Note that Spring Boot supports as well Undertow and Jetty.
-
-=== Use a reactive datastore
-
-In this application, we'll use a MongoDB datastore with its reactive driver;
-for this workshop, we'll use an in-memory instance of MongoDB. So add the following:
-
-[source,xml]
-.trading-service/pom.xml
-----
-include::../trading-service/pom.xml[tags=inMemMongo]
-----
-
-We'd like to manage `TradingUser` with our datastore.
-
-[source,java]
-.trading-service/src/main/java/io/spring/workshop/tradingservice/TradingUser.java
-----
-include::../trading-service/src/main/java/io/spring/workshop/tradingservice/TradingUser.java[]
-----
-
-Now create a `TradingUserRepository` interface that extends `ReactiveMongoRepository`.
-Add a `findByUserName(String userName)` method that returns a single `TradingUser` in a reactive fashion.
-
-We'd like to insert users in our datastore when the application starts up. For that, create a `UsersCommandLineRunner`
-component that implements Spring Boot's `CommandLineRunner`. In the `run` method, use the reactive repository
-to insert `TradingUser` instances in the datastore.
-
-NOTE: Since the `run` method returns void, it expects a blocking implementation. This is why you should use the
-`blockLast(Duration)` operator on the `Flux` returned by the repository when inserting data.
-You can also `then().block(Duration)` to turn that `Flux` into a `Mono<Void>` that waits for completion.
-
-=== Create a JSON web service
-
-We're now going to expose `TradingUser` through a Controller.
-First, create a `UserController` annotated with `@RestController`.
-Then add two new Controller methods in order to handle:
-
-* GET requests to  `"/users"`, returning all `TradingUser` instances, serializing them with content-type `"application/json"`
-* GET requests to  `"/users/{username}"`, returning a single `TradingUser` instance, serializing it with content-type `"application/json"`
-
-You can now validate your implementation with the following test:
-
-[source,java]
-.trading-service/src/test/java/io/spring/workshop/tradingservice/UserControllerTests.java
-----
-include::../trading-service/src/test/java/io/spring/workshop/tradingservice/UserControllerTests.java[]
-----
-
-=== Use Thymeleaf to render HTML views
-
-We already added the Thymeleaf Boot starter when we created our trading application.
-
-First, let's add a couple of WebJar dependencies to get static resources for our application:
-
-[source,xml]
-.trading-service/pom.xml
-----
-include::../trading-service/pom.xml[tags=webjars]
-----
-
-We can now create HTML templates in our `src/main/resources/templates` folder and map them using controllers.
-
-[source,html]
-.trading-service/src/main/resources/templates/index.html
-----
-include::../trading-service/src/main/resources/templates/index.html[]
-----
-
-As you can see in that template, we loop over the `"users"` attribute and write a row in our HTML table for each.
-
-Let's display those users in our application:
-
-* Create a `HomeController` Controller
-* Add a Controller method that handles GET requests to `"/"`
-* Inject the Spring `Model` on that method and add a `"users"` attribute to it
-
-NOTE: Spring WebFlux will resolve automatically `Publisher` instances before rendering the view,
-there's no need to involve blocking code at all!
-
-=== Use the WebClient to stream JSON to the browser
-
-In this section, we'll call our remote `stock-quotes` service to get Quotes from it, so we first need to:
-
-* copy over the `Quote` class to this application
-* add the Jackson JSR310 module dependency
-
-Add the following template file to your application:
-
-[source,html]
-.trading-service/src/main/resources/templates/quotes.html
-----
-include::../trading-service/src/main/resources/templates/quotes.html[]
-----
-
-As you can see in this template file, loading that HTML page will cause the browser to send a request
-the server for `Quotes` using the Server Sent Event transport.
-
-Now create a `QuotesController` annotated with `@Controller` and add two methods.
-One that renders the `quotes.html` template for incoming `"GET /quotes"` requests.
-The other should response to `"GET /quotes/feed"` requests with the `"text/event-stream"` content-type,
-with a `Flux<Quote>` as the response body. This data is already server by the `stock-quotes` application
-, so you can use a `WebClient` to request the remote web service to retrieve that `Flux`.
-
-TIP: You should avoid making a request to the `stock-quotes` service for every browser connecting to
-that page — for that, you can use the `Flux.share()` operator. 
-
-=== Create and Configure a WebSocketHandler
-
-WebFlux includes functional reactive WebSocket client and server support.
-
-On the server side there are two main components: `WebSocketHandlerAdapter` will handle the incoming
-requests by delegating to the configured `WebSocketService` and `WebSocketHandler` will be responsible
-to handle WebSocket session.
-
-Take a look at the code samples in 
-{spring-framework-doc-base}/spring-framework-reference/web.html#web-reactive-websocket-support[Reactive WebSocket Support documentation]
-
-First, create an `EchoWebSocketHandler` class; it has to implement `WebSocketHandler`.
-Now implement `handle(WebSocketSession session)` method. The handler echoes the incoming messages with a delay of 1s.
-
-To route requests to that handler, you need to map the above WebSocket handler to a specific URL: here, `"/websocket/echo"`.
-Create a `WebSocketRouter` configuration class (i.e. annotated with `@Configuration`) that creates a bean of type `HandlerMapping`.
-Create one additional bean of type `WebSocketHandlerAdapter` which will delegate the processing of
-the incoming request to the default `WebSocketService` which is `HandshakeWebSocketService`.
-
-Now create a `WebSocketController` annotated with @Controller and add a method that renders the
-`websocket.html` template for incoming `"GET /websocket"` requests.
-
-Add the following template file to your application:
-
-[source,html]
-.trading-service/src/main/resources/templates/websocket.html
-----
-include::../trading-service/src/main/resources/templates/websocket.html[]
-----
-
-=== Integration tests with WebSocketClient
-
-`WebSocketClient` included in Spring WebFlux can be used to test your WebSocket endpoints.
-
-You can check that your WebSocket endpoint, created in the previous section, is working properly with the 
-following integration test:
-
-[source,java]
-.trading-service/src/test/java/io/spring/workshop/tradingservice/websocket/EchoWebSocketHandlerTests.java
-----
-include::../trading-service/src/test/java/io/spring/workshop/tradingservice/websocket/EchoWebSocketHandlerTests.java[]
 ----
 
 == Additional Resources
