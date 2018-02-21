@@ -360,5 +360,9 @@ include::../stock-quotes/src/test/java/io/spring/workshop/stockquotes/StockQuote
 
 Talks on Spring Reactive:
 
-* https://www.youtube.com/watch?v=rdgJ8fOxJhc[Reactive Web Applications with Spring 5 (Rossen Stoyanchev)]
-* https://www.youtube.com/watch?v=Cj4foJzPF80[Developing Reactive applications with Reactive Streams and Java 8 (B.Clozel, S.Deleuze)]
+* https://content.pivotal.io/springone-platform-2017/designing-implementing-and-using-reactive-apis-ben-hale-paul-harris[Designing, Implementing, and Using Reactive APIs (Ben Hale, Paul Harris)]
+* https://content.pivotal.io/springone-platform-2017/reactive-spring-josh-long-mark-heckler[Reactive Spring (Josh Long, Mark Heckler)]
+
+Hands-on Reactor:
+
+* https://github.com/reactor/lite-rx-api-hands-on[Reactor Hands-on]
