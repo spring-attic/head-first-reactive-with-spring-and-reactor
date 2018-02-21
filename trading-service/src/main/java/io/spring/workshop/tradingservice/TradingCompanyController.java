@@ -19,20 +19,20 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class TradingCompanyController {
 
-	private final TradingCompanyService tradingCompanyService;
+	private final TradingCompanyClient tradingCompanyClient;
 
-	public TradingCompanyController(TradingCompanyService tradingCompanyService) {
-		this.tradingCompanyService = tradingCompanyService;
+	public TradingCompanyController(TradingCompanyClient tradingCompanyClient) {
+		this.tradingCompanyClient = tradingCompanyClient;
 	}
 
 	@GetMapping(path = "/details", produces = MediaType.APPLICATION_JSON_VALUE)
 	public Flux<TradingCompany> listTradingCompanies() {
-		return tradingCompanyService.findAllCompanies();
+		return tradingCompanyClient.findAllCompanies();
 	}
 
 	@GetMapping(path = "/details/{ticker}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public Mono<TradingCompany> showTradingCompanies(@PathVariable String ticker) {
-		return tradingCompanyService.getTradingCompany(ticker);
+		return tradingCompanyClient.getTradingCompany(ticker);
 	}
 
 }

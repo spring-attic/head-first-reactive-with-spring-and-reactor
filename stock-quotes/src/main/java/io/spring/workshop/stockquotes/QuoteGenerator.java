@@ -10,7 +10,6 @@ import java.util.Random;
 import java.util.stream.Collectors;
 
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
 import org.springframework.stereotype.Component;
 
@@ -53,7 +52,6 @@ public class QuoteGenerator {
 				.onBackpressureDrop()
 				.map(this::generateQuotes)
 				.flatMapIterable(quotes -> quotes)
-				.log("io.spring.workshop.stockquotes")
 				.share();
 	}
 

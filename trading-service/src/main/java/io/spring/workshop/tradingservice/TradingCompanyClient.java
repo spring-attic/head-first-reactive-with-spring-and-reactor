@@ -19,25 +19,28 @@ import org.springframework.web.reactive.function.client.WebClient;
  * @author Madhura Bhave
  */
 @Component
-public class TradingCompanyService {
+public class TradingCompanyClient {
 
 	private final WebClient webClient;
 
-	public TradingCompanyService(WebClient.Builder builder) {
+	public TradingCompanyClient(WebClient.Builder builder) {
 		this.webClient = builder.build();
 	}
 
 	public Flux<TradingCompany> findAllCompanies() {
-		return this.webClient.get().uri("http://localhost:8082/details")
+		return this.webClient.get()
+				.uri("http://localhost:8082/details")
 				.accept(MediaType.APPLICATION_JSON)
 				.retrieve()
 				.bodyToFlux(TradingCompany.class);
 	}
 
 	public Mono<TradingCompany> getTradingCompany(String ticker) {
-		return this.webClient.get().uri("http://localhost:8082/details/{ticker}", ticker)
+		return this.webClient.get()
+				.uri("http://localhost:8082/details/{ticker}", ticker)
 				.accept(MediaType.APPLICATION_JSON)
 				.retrieve()
-				.bodyToMono(TradingCompany.class);
+				.bodyToMono(TradingCompany.class)
+				.switchIfEmpty(Mono.error(new TickerNotFoundException("Unknown Ticker: "+ticker)));
 	}
 }
