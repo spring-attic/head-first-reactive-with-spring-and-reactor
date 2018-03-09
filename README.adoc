@@ -6,3 +6,7 @@ https://reactor.github.io/head-first-reactive-with-spring-and-reactor/[follow th
 (the source document is in the "docs" folder) to create your first
 WebFlux applications!
 Each step of this workshop has its companion commit in the git history with a detailed commit message.
+
+
+This branch is an example of rest template + Spring MVC alternative to the main start/complete branches.
+Have a look at https://github.com/reactor/head-first-reactive-with-spring-and-reactor/blob/rest-template-example/trading-service/src/main/java/io/spring/workshop/tradingservice/QuotesController.java to compare with the complete branch.
