@@ -9,12 +9,15 @@ import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Flux;
 
 import org.springframework.stereotype.Component;
 
 @Component
 public class QuoteGenerator {
+	private Logger logger = LoggerFactory.getLogger(getClass());
 
 	private final MathContext mathContext = new MathContext(2);
 
@@ -32,8 +35,29 @@ public class QuoteGenerator {
 		this.quoteStream = getQuoteStream();
 	}
 
+	/**
+	 * Fetch a Flux of streaming stock quotes.
+	 * NB: Calling this method will stream quotes with randomly change price until the application is terminated.
+	 * @return - a continuous stream of stock quotes
+	 */
 	public Flux<Quote> fetchQuoteStream() {
+		// Returns streaming stock quotes
 		return quoteStream;
+	}
+
+	/**
+	 * Fetch a Flux of Quotes with random changes in Quotes prices as defined in List of "prices" on each invocation
+	 * of this method.
+	 * @return - a Flux of Quote with randomly changing prices.
+	 */
+	public Flux<Quote> fetchQuotesRandom(){
+		try {
+			Thread.sleep(1000L);  // add some delay just for testing
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		// Return a Flux of random stock quotes
+		return Flux.fromIterable(generateQuotes(random.nextInt()));
 	}
 
 	private void initializeQuotes() {
@@ -56,6 +80,7 @@ public class QuoteGenerator {
 	}
 
 	private List<Quote> generateQuotes(long i) {
+		logger.info("Generating quotes for transactionId="+i);
 		Instant instant = Instant.now();
 		return prices.stream()
 				.map(baseQuote -> {
