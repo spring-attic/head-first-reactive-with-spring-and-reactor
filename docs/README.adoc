@@ -4,9 +4,9 @@ Stephane Maldini, Ben Hale, Madhura Bhave - Pivotal
 :source-highlighter: prettify
 :icons: font
 :toc:
-:spring-boot-version: 2.0.0.RC2
-:spring-framework-version: 5.0.4.RELEASE
-:reactor-version: BISMUTH-SR6
+:spring-boot-version: 2.0.4.RELEASE
+:spring-framework-version: 5.0.8.RELEASE
+:reactor-version: BISMUTH-SR10
 :spring-framework-doc-base: http://docs.spring.io/spring-framework/docs/{spring-framework-version}
 
 This repository hosts a complete workshop on Spring + Reactor.
