@@ -1,6 +1,7 @@
 package io.spring.workshop.tradingservice;
 
 import java.time.Duration;
+import java.util.stream.Stream;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -20,10 +21,13 @@ public class QuotesClient {
 	}
 
 	public Flux<Quote> quotesFeed() {
-		return this.webClient.get().uri("http://localhost:8081/quotes")
-				.accept(APPLICATION_STREAM_JSON)
-				.retrieve()
-				.bodyToFlux(Quote.class);
+		return this.webClient.get()
+		                     .uri("http://localhost:8081/quotes")
+		                     .accept(APPLICATION_STREAM_JSON)
+		                     .retrieve()
+		                     .bodyToFlux(Quote.class)
+		                     .name("myflow")
+				.metrics();
 	}
 
 	public Mono<Quote> getLatestQuote(String ticker) {

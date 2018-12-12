@@ -5,6 +5,7 @@ import java.math.MathContext;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
@@ -51,9 +52,10 @@ public class QuoteGenerator {
 		return Flux.interval(Duration.ofMillis(200))
 				.onBackpressureDrop()
 				.map(this::generateQuotes)
-				.flatMapIterable(quotes -> quotes)
+				.flatMap(Flux::fromIterable)
 				.share();
 	}
+
 
 	private List<Quote> generateQuotes(long i) {
 		Instant instant = Instant.now();
