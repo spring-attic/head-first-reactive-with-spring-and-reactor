@@ -25,9 +25,7 @@ public class QuotesClient {
 		                     .uri("http://localhost:8081/quotes")
 		                     .accept(APPLICATION_STREAM_JSON)
 		                     .retrieve()
-		                     .bodyToFlux(Quote.class)
-		                     .name("myflow")
-				.metrics();
+		                     .bodyToFlux(Quote.class);
 	}
 
 	public Mono<Quote> getLatestQuote(String ticker) {

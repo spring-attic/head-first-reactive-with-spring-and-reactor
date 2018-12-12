@@ -45,16 +45,6 @@
 			<artifactId>reactor-netty</artifactId>
 			<version>0.8.4.BUILD-SNAPSHOT</version>
 		</dependency>
-		<dependency>
-			<groupId>org.springframework.cloud</groupId>
-			<artifactId>spring-cloud-starter-sleuth</artifactId>
-			<version>2.1.0.RC2</version>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.cloud</groupId>
-			<artifactId>spring-cloud-sleuth-zipkin</artifactId>
-			<version>2.1.0.RC2</version>
-		</dependency>
 	</dependencies>
 
 	<build>
