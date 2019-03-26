@@ -6,7 +6,7 @@ Brian Clozel, Violeta Georgieva - Pivotal
 :toc: 
 :spring-boot-version: 2.0.0.M1
 :spring-framework-version: 5.0.0.RC1
-:spring-framework-doc-base: http://docs.spring.io/spring-framework/docs/{spring-framework-version}
+:spring-framework-doc-base: https://docs.spring.io/spring-framework/docs/{spring-framework-version}
 
 This repository hosts a complete workshop on Spring Boot + Spring WebFlux.
 Just follow this README and create your first WebFlux applications!
@@ -19,7 +19,7 @@ We'll create two applications:
 
 Reference documentations can be useful while working on those apps:
 
-* http://projectreactor.io/docs[Reactor Core documentation]
+* https://projectreactor.io/docs[Reactor Core documentation]
 * Spring WebFlux 
 {spring-framework-doc-base}/spring-framework-reference/web.html#web-reactive[reference documentation]
 and {spring-framework-doc-base}/javadoc-api/[javadoc]
