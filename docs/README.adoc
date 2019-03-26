@@ -7,7 +7,7 @@ Stephane Maldini, Ben Hale, Madhura Bhave - Pivotal
 :spring-boot-version: 2.0.4.RELEASE
 :spring-framework-version: 5.0.8.RELEASE
 :reactor-version: BISMUTH-SR10
-:spring-framework-doc-base: http://docs.spring.io/spring-framework/docs/{spring-framework-version}
+:spring-framework-doc-base: https://docs.spring.io/spring-framework/docs/{spring-framework-version}
 
 This repository hosts a complete workshop on Spring + Reactor.
 Just follow this README and create your first reactive Spring applications!
@@ -21,7 +21,7 @@ At the end of the workshop, we will have created three applications:
 
 Reference documentations can be useful while working on those apps:
 
-* http://projectreactor.io/docs[Reactor Core documentation]
+* https://projectreactor.io/docs[Reactor Core documentation]
 * https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Flux.html[API documentation for Flux]
 * https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html[API documentation for Mono]
 * Spring WebFlux
