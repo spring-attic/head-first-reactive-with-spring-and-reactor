@@ -4,4 +4,6 @@ datasources:
 - name: prometheus
   type: prometheus
   access: direct
-  url: https://10.200.10.1:9090
+# Note Prometheus should preferably be secured by a reverse proxy
+# See https://prometheus.io/docs/operating/security/#authentication-authorization-and-encryption
+  url: http://10.200.10.1:9090
