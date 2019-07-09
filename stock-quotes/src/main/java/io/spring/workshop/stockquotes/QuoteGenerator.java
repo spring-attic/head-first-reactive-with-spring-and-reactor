@@ -38,13 +38,12 @@ public class QuoteGenerator {
 	}
 
 	private void initializeQuotes() {
-		this.prices.add(new Quote("PVTL", 82.26));
-		this.prices.add(new Quote("DELL", 63.74));
+		this.prices.add(new Quote("TWLO", 10.26));
 		this.prices.add(new Quote("GOOG", 847.24));
 		this.prices.add(new Quote("MSFT", 65.11));
 		this.prices.add(new Quote("ORCL", 45.71));
-		this.prices.add(new Quote("RHT", 84.29));
-		this.prices.add(new Quote("VMW", 92.21));
+		this.prices.add(new Quote("RHT", 180.42));
+		this.prices.add(new Quote("VMW", 165.32));
 	}
 
 

@@ -4,6 +4,10 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.messaging.handler.annotation.DestinationVariable;
+import org.springframework.messaging.handler.annotation.MessageExceptionHandler;
+import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.rsocket.RSocketRequester;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,34 +19,32 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.http.MediaType.TEXT_EVENT_STREAM_VALUE;
 
 @Controller
-public class QuotesController {
+public class QuotesRSocketController {
 
 	private final TradingCompanyClient tradingCompanyClient;
 
 	private final QuotesRSocketClient quotesRSocketClient;
 
-	public QuotesController(TradingCompanyClient tradingCompanyClient, QuotesRSocketClient quotesRSocketClient) {
+	public QuotesRSocketController(TradingCompanyClient tradingCompanyClient, QuotesRSocketClient quotesRSocketClient) {
 		this.tradingCompanyClient = tradingCompanyClient;
 		this.quotesRSocketClient = quotesRSocketClient;
 	}
 
-	@GetMapping(path = "/quotes/feed", produces = TEXT_EVENT_STREAM_VALUE)
-	@ResponseBody
-	public Flux<Quote> quotesFeed() {
+	@MessageMapping("quotes.feed")
+	public Flux<Quote> quotesFeed(RSocketRequester client) {
 		return this.quotesRSocketClient.quotesFeed();
 	}
 
-	@GetMapping(path = "/quotes/summary/{ticker}", produces = APPLICATION_JSON_VALUE)
-	@ResponseBody
-	public Mono<TradingCompanySummary> quotesDetails(@PathVariable String ticker) {
+	@MessageMapping("quotes.summary.{ticker}")
+	public Mono<TradingCompanySummary> quotesDetails(@DestinationVariable String ticker) {
 		return tradingCompanyClient.getTradingCompany(ticker)
 				.zipWith(this.quotesRSocketClient.getLatestQuote(ticker),
 						TradingCompanySummary::new);
 	}
 
-	@ResponseStatus(HttpStatus.NOT_FOUND)
-	@ExceptionHandler(TickerNotFoundException.class)
-	public void onTickerNotFound() {
+	@MessageExceptionHandler(TickerNotFoundException.class)
+	public Mono<Quote> onTickerNotFound(TickerNotFoundException e) {
+		return Mono.empty();
 	}
 
 }
