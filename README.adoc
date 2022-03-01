@@ -1,3 +1,5 @@
+= head-first-reactive-with-spring-and-reactor is no longer actively maintained by VMware, Inc.
+
 = Head-First Reactive Workshop
 
 This repository hosts a complete workshop on Spring + Reactor.
